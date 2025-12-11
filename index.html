@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Planificador de Menú Semanal 🥗🍽️</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Pequeñas reglas extra para mejor UX en contenteditable */
+    [contenteditable] {
+      min-height: 2.2rem;
+      outline: none;
+    }
+    .cell-focused {
+      box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+      border-radius: .375rem;
+    }
+    /* Estilos para ingredientes list */
+    .strike { text-decoration: line-through; color: #9CA3AF; }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-emerald-50 to-white min-h-screen p-6 font-sans">
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <header class="mb-6">
+      <h1 class="text-3xl md:text-4xl font-extrabold text-emerald-800 mb-2 flex items-center gap-3">
+        🥗 Planificador semanal saludable
+        <span class="text-sm bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full">2 adultos • Lun–Vie</span>
+      </h1>
+      <p class="text-emerald-700/80">Edita cualquier celda, genera sugerencias saludables, y crea la lista de la compra automáticamente. 🛒✨</p>
+    </header>
+
+    <!-- Controls -->
+    <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center mb-6">
+      <div class="flex gap-3">
+        <button id="suggestBtn" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow">
+          🎲 Sugerir platos saludables
+        </button>
+        <button id="clearBtn" class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-400 text-white shadow">
+          🧹 Borrar tabla
+        </button>
+        <button id="genListBtn" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow">
+          🛒 Generar lista de la compra
+        </button>
+      </div>
+
+      <div class="ml-auto text-sm text-amber-700 bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
+        Nota: 🧺 Miércoles y jueves la comida será portátil (se seleccionan platos "para llevar").
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto mb-6">
+      <table class="min-w-full table-auto bg-white rounded-2xl shadow overflow-hidden">
+        <thead class="bg-emerald-50">
+          <tr>
+            <th class="p-3 text-left text-sm text-emerald-700/90">Comida / Día</th>
+            <th class="p-3 text-center text-sm text-emerald-700">Lunes</th>
+            <th class="p-3 text-center text-sm text-emerald-700">Martes</th>
+            <th class="p-3 text-center text-sm text-emerald-700">Miércoles<br><span class="text-xs text-emerald-500">llevar</span></th>
+            <th class="p-3 text-center text-sm text-emerald-700">Jueves<br><span class="text-xs text-emerald-500">llevar</span></th>
+            <th class="p-3 text-center text-sm text-emerald-700">Viernes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Desayuno -->
+          <tr class="border-t">
+            <td class="p-3 bg-emerald-50 text-emerald-700 font-medium">🍳 Desayuno</td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="lunes" data-meal="desayuno"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="martes" data-meal="desayuno"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="miercoles" data-meal="desayuno"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="jueves" data-meal="desayuno"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="viernes" data-meal="desayuno"></div>
+            </td>
+          </tr>
+
+          <!-- Comida -->
+          <tr class="border-t">
+            <td class="p-3 bg-emerald-50 text-emerald-700 font-medium">🥗 Comida</td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="lunes" data-meal="comida"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="martes" data-meal="comida"></div>
+            </td>
+            <td class="p-2">
+              <!-- Wednesday: llevar -->
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="miercoles" data-meal="comida" data-llevar="true"></div>
+            </td>
+            <td class="p-2">
+              <!-- Thursday: llevar -->
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="jueves" data-meal="comida" data-llevar="true"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="viernes" data-meal="comida"></div>
+            </td>
+          </tr>
+
+          <!-- Cena -->
+          <tr class="border-t">
+            <td class="p-3 bg-emerald-50 text-emerald-700 font-medium">🌙 Cena</td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="lunes" data-meal="cena"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="martes" data-meal="cena"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="miercoles" data-meal="cena"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="jueves" data-meal="cena"></div>
+            </td>
+            <td class="p-2">
+              <div class="p-2 rounded-md hover:bg-emerald-50 cursor-text" contenteditable="true" data-day="viernes" data-meal="cena"></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Shopping list & Notes -->
+    <section class="grid md:grid-cols-2 gap-6">
+      <div class="bg-white p-5 rounded-2xl shadow-md">
+        <h2 class="font-semibold text-emerald-800 text-lg mb-3">🛒 Lista de la compra</h2>
+        <p class="text-sm text-emerald-600 mb-3">Generada a partir de los platos seleccionados. Marca los artículos comprados o añade manualmente.</p>
+
+        <ul id="shoppingList" class="divide-y divide-emerald-100 mb-3"></ul>
+
+        <div class="flex gap-2">
+          <input id="manualItem" placeholder="Añadir artículo manual..." class="flex-1 px-3 py-2 rounded border border-emerald-100 focus:outline-none" />
+          <button id="addManualBtn" class="px-3 py-2 rounded bg-emerald-600 text-white">➕ Añadir</button>
+        </div>
+        <div class="text-xs text-emerald-500 mt-3">Puedes marcar ítems para tacharlos o eliminarlos con la papelera.</div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl shadow-md">
+        <h2 class="font-semibold text-emerald-800 text-lg mb-3">ℹ️ Consejos & Notas</h2>
+        <ul class="text-sm text-emerald-600 space-y-2">
+          <li>• Las sugerencias priorizan platos fáciles, saludables y variedad de proteínas (pollo, pescado, legumbres, alternando verduras y cereales).</li>
+          <li>• Miércoles y jueves la comida sugerida está marcada como <strong>para llevar</strong> (wraps, ensaladas robustas, bowls fríos).</li>
+          <li>• Edita cualquier celda si prefieres otra opción; luego vuelve a generar la lista de la compra.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="mt-8 text-xs text-emerald-500">
+      Hecho con ❤️ — plantea variaciones si queréis más recetas o restricciones (vegetariano, sin gluten, etc.).
+    </footer>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    /***********************
+     * Datos de recetas
+     ***********************/
+    const RECIPES = [
+  /* DESAYUNOS */
+  { name: "Avena con fruta 🥣", meal: "desayuno", portable: true, protein: "n/a", ingredients: ["avena","leche","fruta","miel"] },
+  { name: "Tostada con aguacate 🥑", meal: "desayuno", portable: false, protein: "huevo", ingredients: ["pan","aguacate","huevo opcional"] },
+  { name: "Yogur con granola 🍓", meal: "desayuno", portable: true, protein: "n/a", ingredients: ["yogur","granola","fruta"] },
+  { name: "Huevos revueltos rápidos 🍳", meal: "desayuno", portable: false, protein: "huevo", ingredients: ["huevos","aceite"] },
+  { name: "Bocadillo pequeño de jamón 🥖", meal: "desayuno", portable: true, protein: "jamon", ingredients: ["pan","jamón"] },
+
+  /* COMIDAS (incluye platos caseros y para llevar) */
+  { name: "Pasta integral con pollo 🍝🍗", meal: "comida", portable: false, protein: "pollo", ingredients: ["pasta","pollo","tomate","aceite"] },
+  { name: "Arroz con verduras 🍚🥕", meal: "comida", portable: true, protein: "n/a", ingredients: ["arroz","pimiento","cebolla","zanahoria"] },
+  { name: "Albóndigas caseras con arroz 🍛", meal: "comida", portable: false, protein: "ternera", ingredients: ["carne picada","huevo","arroz","tomate"] },
+  { name: "Pollo al horno con patatas 🍗🥔", meal: "comida", portable: false, protein: "pollo", ingredients: ["pollo","patatas","aceite","hierbas"] },
+  { name: "Pasta con atún y tomate 🍝🐟", meal: "comida", portable: true, protein: "pescado", ingredients: ["pasta","atún","tomate"] },
+  { name: "Wrap de pollo y queso 🌯", meal: "comida", portable: true, protein: "pollo", ingredients: ["tortilla","pollo","queso","lechuga"] },
+  { name: "Tortilla de patata (porción) 🍳🥔", meal: "comida", portable: true, protein: "huevo", ingredients: ["huevos","patatas","aceite"] },
+  { name: "Lasaña de carne (casera o recalentada) 🍲", meal: "comida", portable: false, protein: "ternera", ingredients: ["pasta lasaña","carne","tomate","queso"] },
+  { name: "Ensalada de pasta sencilla 🥗🍝", meal: "comida", portable: true, protein: "n/a", ingredients: ["pasta","tomate","aceite","queso opcional"] },
+
+  /* CENAS (más simples y rápidas) */
+  { name: "Salmón a la plancha con verduras 🐟", meal: "cena", portable: false, protein: "pescado", ingredients: ["salmón","brócoli","limón"] },
+  { name: "Pechuga de pollo a la plancha con ensalada 🍗", meal: "cena", portable: false, protein: "pollo", ingredients: ["pollo","lechuga","tomate"] },
+  { name: "Revuelto de huevos con espinacas 🍳🥬", meal: "cena", portable: false, protein: "huevo", ingredients: ["huevos","espinacas"] },
+  { name: "Tostadas con jamón y tomate 🥖🍅", meal: "cena", portable: false, protein: "jamon", ingredients: ["pan","jamón","tomate"] },
+  { name: "Arroz con atún y maíz 🍚🐟", meal: "cena", portable: true, protein: "pescado", ingredients: ["arroz","atún","maíz"] },
+  { name: "Sopa de verduras ligera 🍲", meal: "cena", portable: false, protein: "n/a", ingredients: ["verduras variadas"] },
+  { name: "Tacos caseros de pollo 🌮", meal: "cena", portable: false, protein: "pollo", ingredients: ["pollo","tortillas","lechuga"] }
+];
+
+
+    // días y meals para iteración
+    const DAYS = ["lunes","martes","miercoles","jueves","viernes"];
+    const MEALS = ["desayuno","comida","cena"];
+
+    /***********************
+     * Helpers
+     ***********************/
+    function getCells() {
+      return Array.from(document.querySelectorAll('[contenteditable][data-day]'));
+    }
+
+    function findRecipeByName(name) {
+      return RECIPES.find(r => r.name.toLowerCase().trim() === name.toLowerCase().trim());
+    }
+
+    // Devuelve lista de recetas filtradas por meal, portable si se solicita
+    function recipesFor(meal, portableRequired=false) {
+      return RECIPES.filter(r => r.meal === meal && (!portableRequired || r.portable === true));
+    }
+
+    // Escoge un elemento aleatorio de un array
+    function rand(arr) {
+      return arr[Math.floor(Math.random()*arr.length)];
+    }
+
+    /***********************
+     * Lógica de sugerencias
+     ***********************/
+    document.getElementById('suggestBtn').addEventListener('click', () => {
+      // Estrategia simple para combinaciones saludables:
+      // - Para cada día, seleccionar desayuno, comida, cena.
+      // - Asegurar que no se repita la misma "protein" en el mismo día si es posible.
+      // - Miércoles y jueves: comida debe ser portable.
+      const tableCells = getCells();
+
+      DAYS.forEach(day => {
+        // trackear proteínas elegidas ese día
+        const usedProteins = new Set();
+
+        MEALS.forEach(meal => {
+          const portable = (meal === 'comida' && (day === 'miercoles' || day === 'jueves'));
+          let candidates = recipesFor(meal, portable);
+
+          // intentar evitar repetir proteína en el día
+          let choice = null;
+          // primera pasada: priorizar candidatos con proteína diferente
+          const filtered = candidates.filter(c => !usedProteins.has(c.protein));
+          if (filtered.length) choice = rand(filtered);
+          else if (candidates.length) choice = rand(candidates);
+
+          // si no hay candidates (raro), dejar vacío
+          const cell = tableCells.find(c => c.dataset.day === day && c.dataset.meal === meal);
+          if (choice && cell) {
+            cell.innerText = choice.name;
+            if (choice.protein && choice.protein !== "n/a") usedProteins.add(choice.protein);
+          } else if (cell) {
+            cell.innerText = "";
+          }
+        });
+      });
+
+      // Dar feedback visual
+      flashMessage("Sugerencias generadas ✅");
+    });
+
+    /***********************
+     * Borrar tabla
+     ***********************/
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      getCells().forEach(c => c.innerText = "");
+      document.getElementById('shoppingList').innerHTML = "";
+      flashMessage("Tabla borrada.");
+    });
+
+    /***********************
+     * Generar lista de la compra
+     ***********************/
+    document.getElementById('genListBtn').addEventListener('click', () => {
+      const items = {}; // ingrediente -> cantidad aproximada (conteo)
+      const unknownDishes = [];
+
+      getCells().forEach(cell => {
+        const dish = cell.innerText.trim();
+        if (!dish) return;
+        const recipe = findRecipeByName(dish);
+        if (recipe) {
+          recipe.ingredients.forEach(ing => {
+            const key = ing.toLowerCase();
+            items[key] = (items[key]||0) + 1;
+          });
+        } else {
+          // no está en la base de datos - lo añado como nota para revisar
+          unknownDishes.push(dish);
+        }
+      });
+
+      // Construir DOM de la lista
+      const listEl = document.getElementById('shoppingList');
+      listEl.innerHTML = "";
+
+      // convertir items en array ordenado
+      const itemEntries = Object.entries(items).sort((a,b)=> b[1]-a[1]);
+
+      if (itemEntries.length === 0 && unknownDishes.length === 0) {
+        listEl.innerHTML = "<li class='py-3 text-emerald-500'>La tabla está vacía — añade platos o genera sugerencias primero.</li>";
+        flashMessage("Nada para generar.");
+        return;
+      }
+
+      itemEntries.forEach(([ing, count]) => {
+        const li = document.createElement('li');
+        li.className = "py-2 flex items-center justify-between";
+        li.innerHTML = `
+          <label class="flex items-center gap-3">
+            <input type="checkbox" class="item-checkbox" />
+            <span class="capitalize">${ing} <span class="text-xs text-emerald-400">(${count})</span></span>
+          </label>
+          <div class="flex items-center gap-2">
+            <button class="text-amber-500 text-sm btn-edit">✏️</button>
+            <button class="text-red-400 text-sm btn-del">🗑️</button>
+          </div>`;
+        listEl.appendChild(li);
+
+        li.querySelector('.btn-del').addEventListener('click', () => li.remove());
+        li.querySelector('.btn-edit').addEventListener('click', () => {
+          const newVal = prompt("Editar artículo:", ing);
+          if (newVal) {
+            li.querySelector('span').innerText = newVal;
+          }
+        });
+      });
+
+      if (unknownDishes.length) {
+        const note = document.createElement('li');
+        note.className = "pt-3 text-sm text-amber-700";
+        note.innerHTML = `<strong>Platos no reconocidos:</strong> ${unknownDishes.map(s=>`"${s}"`).join(", ")} — no se han añadido ingredientes para estos.`;
+        listEl.appendChild(note);
+      }
+
+      flashMessage("Lista de la compra generada 🛒");
+    });
+
+    /***********************
+     * Añadir manual
+     ***********************/
+    document.getElementById('addManualBtn').addEventListener('click', () => {
+      const val = document.getElementById('manualItem').value.trim();
+      if (!val) return;
+      const listEl = document.getElementById('shoppingList');
+      const li = document.createElement('li');
+      li.className = "py-2 flex items-center justify-between";
+      li.innerHTML = `<label class="flex items-center gap-3">
+            <input type="checkbox" class="item-checkbox" />
+            <span>${val}</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <button class="text-amber-500 text-sm btn-edit">✏️</button>
+            <button class="text-red-400 text-sm btn-del">🗑️</button>
+          </div>`;
+      listEl.prepend(li);
+      li.querySelector('.btn-del').addEventListener('click', () => li.remove());
+      li.querySelector('.btn-edit').addEventListener('click', () => {
+        const newVal = prompt("Editar artículo:", val);
+        if (newVal) li.querySelector('span').innerText = newVal;
+      });
+      document.getElementById('manualItem').value = "";
+      flashMessage("Artículo añadido.");
+    });
+
+    /***********************
+     * UI niceties: focus, flash
+     ***********************/
+    getCells().forEach(c => {
+      c.addEventListener('focus', () => c.classList.add('cell-focused'));
+      c.addEventListener('blur', () => c.classList.remove('cell-focused'));
+      // small shortcut: double click clears cell
+      c.addEventListener('dblclick', () => { if (confirm('Borrar contenido de esta celda?')) c.innerText = ""; });
+    });
+
+    function flashMessage(msg) {
+      const el = document.createElement('div');
+      el.className = "fixed right-6 bottom-6 bg-emerald-600 text-white px-4 py-2 rounded shadow-lg animate-fade";
+      el.innerText = msg;
+      document.body.appendChild(el);
+      setTimeout(()=> el.remove(), 1800);
+    }
+
+    // small animation keyframes (inject)
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes fade { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0);} }
+      .animate-fade { animation: fade .22s ease-out; }
+    `;
+    document.head.appendChild(style);
+
+    /***********************
+     * Mejora: al cargar, poner ejemplos suaves
+     ***********************/
+    window.addEventListener('DOMContentLoaded', () => {
+      // sugerencia ligera inicial sin sobreescribir si usuario ya tiene algo
+      const someFilled = getCells().some(c => c.innerText.trim());
+      if (!someFilled) {
+        // pre-llenar desayuno de viernes y comida mier/juv como hint (no obligatorio)
+        const preHints = [
+          {day:'lunes', meal:'desayuno', text:'Avena nocturna con fruta 🥣'},
+          {day:'miercoles', meal:'comida', text:'Ensalada de quinoa con garbanzos 🥗'},
+          {day:'jueves', meal:'comida', text:'Wrap integral de pollo y verduras 🌯'}
+        ];
+        preHints.forEach(h => {
+          const c = getCells().find(x => x.dataset.day === h.day && x.dataset.meal === h.meal);
+          if (c) c.innerText = h.text;
+        });
+      }
+    });
+
+  </script>
+</body>
+</html>
